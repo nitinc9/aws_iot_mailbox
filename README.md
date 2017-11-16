@@ -5,8 +5,10 @@ Repository for using an IOT mailbox (technically a shadow of physical mailbox) a
 
 The Mailbox state management logic is relatively straight-forward for the purpose of illustration. A more complex logic can be built using multiple sensors,
 such as, a photo sensor in combination with the open/close sensor.
-- The Mailbox manager lambda has a simple intelligence to set the mailbox state to having mail if it is opened within the delivery schedule.
+- The Mailbox manager lambda sets the mailbox state to having mail if it is opened within the delivery schedule.
 - If opened more than once within the delivery schedule or post delivery schedule, the mailbox state is reset (i.e., mail has been cleared). 
+
+![AWS IoT Mailbox Overview](docs/AWS_IoT_Mailbox_Overview.png?raw=true "AWS IoT Mailbox Overview") 
 
 ## Setup
 
