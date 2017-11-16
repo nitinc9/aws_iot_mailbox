@@ -1,0 +1,32 @@
+{
+  "intents": [
+    {
+      "name": "AMAZON.CancelIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": []
+    },
+    {
+      "name": "CheckMailIntent",
+      "samples": [
+        "check mail",
+        "do I have mail"
+      ],
+      "slots": []
+    },
+    {
+      "name": "ResetMailboxIntent",
+      "samples": [
+        "clear",
+        "reset"
+      ],
+      "slots": []
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+   "AWSTemplateFormatVersion": "2010-09-09",
+   "Description": "Creates the IOT MailboxManager lambda.",
+   "Parameters": {
+     "Name": {
+       "Type": "String",
+       "Default": "Mailbox"
+     }
+   },
+   "Resources": {
+     "MailboxManagerRole": {
+       "Type": "AWS::IAM::Role",
+       "Properties": {
+         "RoleName": "MailboxManager",
+         "AssumeRolePolicyDocument": {
+           "Version": "2012-10-17",
+           "Statement": [
+             {
+               "Effect": "Allow",
+               "Principal": {
+                 "Service": [
+                   "lambda.amazonaws.com"
+                 ]
+               },
+               "Action": [
+                 "sts:AssumeRole"
+               ]
+             }
+           ]
+         },
+         "Path": "/",
+         "Policies": [
+           {
+             "PolicyName": "Mailbox-Manager",
+             "PolicyDocument": {
+               "Version": "2012-10-17",
+               "Statement": [
+                 {
+                   "Effect": "Allow",
+                   "Action": [
+                     "logs:CreateLogGroup",
+                     "logs:CreateLogStream",
+                     "logs:PutLogEvents"
+                   ],
+                   "Resource": "*"
+                 },
+                 {
+                   "Effect": "Allow",
+                   "Action": [
+                     "iot:*"
+                   ],
+                   "Resource": "*"
+                 }
+               ]
+             }
+           }
+         ]
+       }
+     },
+     "MailboxManagerLambda": {
+       "Type" : "AWS::Lambda::Function",
+       "Properties": {
+         "FunctionName": "MailboxManager",
+         "Description": "The IOT Mailbox Manager.",
+         "Handler": "index.handler",
+         "Runtime": "nodejs4.3",
+         "Timeout": "300",
+         "Role": {"Fn::GetAtt": ["MailboxManagerRole", "Arn"]},
+         "Code": {
+           "ZipFile": {
+             "Fn::Join": [
+               "\n",
+               [
+                 "//=========================================================================================================================================",
+                 "// MailboxManager uses the following simplified logic to manage the mailbox state.",
+                 "// - If mailbox is opened with delivery schedule for the first time, it treats it as mail delivery and sets the 'hasMail' attribute to true.",
+                 "// - If the mailbox is opened more than once or after the delivery schedule, it treats the mail has been picked up and resets the 'hasMail'.",
+                 "//=========================================================================================================================================",
+                 "",
+                 "'use strict';",
+                 "var AWS = require('aws-sdk');",
+                 "",
+                 "//=========================================================================================================================================",
+                 "//TODO: Replace this data with your test IOT device. Also, adjust the default mail delivery hours, if needed.",
+                 "//=========================================================================================================================================",
+                 "const IOT_BROKER_ENDPOINT = 'a1t29bkg2wt9ft.iot.us-east-1.amazonaws.com';",
+                 "const IOT_BROKER_REGION = 'us-east-1';",
+                 "const IOT_THING_NAME = 'MyMailbox';",
+                 "const MAIL_DELIVERY_START_HOUR = 8; // 0 = 1st hr",
+                 "const MAIL_DELIVERY_END_HOUR = 19;",
+                 "",
+                 "exports.handler = (event, context, callback) => {",
+                 "  var mailbox = event;",
+                 "  console.log('isOpen: ' + mailbox.isOpen);",
+                 "  var hasMail = 'false';",
+                 "",
+                 "  //Initialize the IoT client",
+                 "  var config = {};",
+                 "  config.IOT_BROKER_ENDPOINT = IOT_BROKER_ENDPOINT.toLowerCase();",
+                 "  config.IOT_BROKER_REGION = IOT_BROKER_REGION;",
+                 "  config.IOT_THING_NAME = IOT_THING_NAME;",
+                 "  var iotData = new AWS.IotData({endpoint: config.IOT_BROKER_ENDPOINT});",
+                 "  AWS.config.region = config.IOT_BROKER_REGION;",
+                 "",
+                 "  // Get the current state of mailbox and process accordingly",
+                 "  var params = {",
+                 "    'thingName': config.IOT_THING_NAME",
+                 "  };",
+                 "  iotData.getThingShadow(params, function(err, data) {",
+                 "    if (err) {",
+                 "      console.log('Error getting mailbox: ' + err);",
+                 "      callback(err);",
+                 "    }",
+                 "    else {",
+                 "      console.log('Device data: ' + JSON.stringify(data));",
+                 "      // Check if mailbox was opened within mail delivery period and set the 'hasMail' accordingly",
+                 "      var payload = JSON.parse(data.payload);",
+                 "      hasMail = payload.state.desired.hasMail;",
+                 "      if (mailbox.isOpen === 'true') {",
+                 "        var now = new Date();",
+                 "        var hour = now.getHours();",
+                 "        console.log('Current hour: ' + hour + ', mailDeliveryStartHour: ' + MAIL_DELIVERY_START_HOUR + ', mailDeliveryEndHour: ' + MAIL_DELIVERY_END_HOUR);",
+                 "        if (hour >= MAIL_DELIVERY_START_HOUR && hour <= MAIL_DELIVERY_END_HOUR) {",
+                 "          if (hasMail === 'false') {",
+                 "            console.log('Mailbox opened within delivery hours for the first time, treating this as a mail delivery event.');",
+                 "            hasMail = 'true';",
+                 "          }",
+                 "          else {",
+                 "            console.log('Mail has already been delivered, treating this as a mail pickup event.');",
+                 "            hasMail = 'false';",
+                 "          }",
+                 "        }",
+                 "        else {",
+                 "          console.log('Mailbox opened outside delivery hours, treating this as a mail pickup event.');",
+                 "          hasMail = 'false';",
+                 "        }",
+                 "",
+                 "        // Now update mailbox",
+                 "        var payload = {",
+                 "          'state': {",
+                 "            'desired': {",
+                 "              'isOpen': mailbox.isOpen,",
+                 "              'hasMail': hasMail",
+                 "            },",
+                 "            'reported': {",
+                 "              'isOpen': mailbox.isOpen,",
+                 "              'hasMail': hasMail",
+                 "            }",
+                 "          }",
+                 "        };",
+                 "        var params = {",
+                 "          'thingName': config.IOT_THING_NAME,",
+                 "          'payload': JSON.stringify(payload)",
+                 "        };",
+                 "        console.log('payload: ' + JSON.stringify(payload));",
+                 "        iotData.updateThingShadow(params, function(err, data) {",
+                 "          if (err) {",
+                 "            console.log('Error updating mailbox: ' + err);",
+                 "            callback(err);",
+                 "          }",
+                 "          else {",
+                 "            console.log('Device data: ' + JSON.stringify(data));",
+                 "            callback(null);",
+                 "          }",
+                 "        });",
+                 "      }",
+                 "    }",
+                 "  });",
+                 "};"
+               ]
+             ]
+           }
+         }
+       }
+     }
+   }
+}
