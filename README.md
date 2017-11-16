@@ -18,30 +18,30 @@ such as, a photo sensor in combination with the open/close sensor.
 
 
 ### Setup Instructions
-1. Mailbox IOT Device Setup
+#### 1. Mailbox IOT Device Setup
 
-1.1 Create an IOT Role
+##### 1.1 Create an IOT Role
 ```
 aws iam create-role --role-name iot-role --assume-role-policy-document file://iot_role_trust.json
 ```
 
-1.2 Create an IOT Policy and attach Role
+##### 1.2 Create an IOT Policy and attach Role
 ```
 aws iam create-policy --policy-name "Mailbox-Policy" --policy-document file://mailbox_policy.json
 aws iam attach-role-policy --role-name iot-role --policy-arn "arn:aws:iam::281672010130:policy/Mailbox-Policy"
 ```
 
-1.3 Create a Thing Type
+##### 1.3 Create a Thing Type
 ```
 aws iot create-thing-type --thing-type-name "Mailbox" --thing-type-properties "thingTypeDescription=Mailbox, searchableAttributes=isOpen,hasMail"
 ```
 
-1.4 Create a Mailbox Thing
+##### 1.4 Create a Mailbox Thing
 ```
 aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attribute-payload "{\"attributes\": {\"isOpen\": \"false\", \"hasMail\": \"false\"}}"
 ```
 
-1.5 Create the MailboxManager lambda
+##### 1.5 Create the MailboxManager lambda
 
 - Edit the ```mailbox_manager.cfn``` and replace the following.
   - **IOT_BROKER_ENDPOINT**: Update this to point to the REST API endpoint of your thing from **Device Details->Interact**.
@@ -50,7 +50,7 @@ aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attr
 - Use the ```mailbox_manager.cfn``` to create the lambda that manages the updates to the Mailbox IOT device.
 - After the lambda is created, add a trigger from "Alexa Skills Kit". 
 
-1.6 Create a Rule to update Mailbox
+##### 1.6 Create a Rule to update Mailbox
 
 - Specify the query to fetch data from an IOT topic.
   ```
@@ -60,7 +60,7 @@ aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attr
 - Specify an action to associate the above lambda (```MailboxManager```) when this rule is triggered.
 
 
-2. Mailbox Alexa Skill Setup
+#### 2. Mailbox Alexa Skill Setup
 
 - Run the following command to create a new Mailbox skill in your developer account.
   ```
@@ -79,7 +79,7 @@ aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attr
 - Once the skill has been deployed, enable the "Test" button to start testing the skill.
 
 
-3. Testing
+#### 3. Testing
 
 - Use the AWS IoT Console to publish a message to the 'mail' topic. Use the payload below for reference and manipulate the value for "isOpen".
   ```
@@ -93,7 +93,7 @@ aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attr
   reset
   ```
 
-4. Troubleshooting
+#### 4. Troubleshooting
 
 Check out the following CloudWatch log groups.
 
