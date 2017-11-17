@@ -84,7 +84,7 @@ aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attr
 - Once the skill has been deployed, enable the "Test" button to start testing the skill.
 
 
-#### 3. Testing
+## Testing
 
 - Use the AWS IoT Console to publish a message to the 'mail' topic. Use the payload below for reference and manipulate the value for "isOpen".
   ```
@@ -98,9 +98,12 @@ aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attr
   reset
   ```
 
-#### 4. Troubleshooting
+## Troubleshooting
 
 Check out the following CloudWatch log groups.
 
 - MailboxManager: For troubleshooting the Mailbox IOT device events.
 - Mailbox: For the Alexa Skill processing troubleshooting.
+
+## Demo
+YouTube: https://youtu.be/zRiU89Hjwes
