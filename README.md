@@ -107,3 +107,6 @@ Check out the following CloudWatch log groups.
 
 ## Demo
 YouTube: https://youtu.be/zRiU89Hjwes
+
+## License
+https://www.apache.org/licenses/LICENSE-2.0
