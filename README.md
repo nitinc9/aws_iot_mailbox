@@ -78,6 +78,7 @@ aws iot create-thing --thing-name "MyMailbox" --thing-type-name "Mailbox" --attr
   cd alexa
   ask deploy
   ```
+- After first deployment edit the deployed IAM role ```ask-lambda-Mailbox``` and attach AWSIoTFullAccess policy to it.
 - Once the skill has been deployed, enable the "Test" button to start testing the skill.
 
 
