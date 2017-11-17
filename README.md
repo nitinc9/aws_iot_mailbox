@@ -1,5 +1,7 @@
 # aws_iot_mailbox
-Repository for using an IOT mailbox (technically a shadow of physical mailbox) and checking/managing mail status. It has 2 main components
+A simple project that demonstrates the power of IoT along with an Alexa Skill to check mail.
+
+It has 2 main components
 - A Mailbox IOT device that acts as a shadow for a physical mailbox. For the purpose of this project, it is a virtual IOT device.
 - An Alexa Skill to check whether there are any mails and to reset the state of the mailbox.
 
